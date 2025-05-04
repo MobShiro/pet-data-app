@@ -1,373 +1,281 @@
-<?php include 'includes/header.php'; ?>
+<?php
+require_once 'includes/db_connect.php';
+require_once 'includes/auth.php';
+require_once 'includes/functions.php';
 
-<!-- Hero Section -->
-<section class="hero-section position-relative">
-    <div id="heroCarousel" class="carousel slide carousel-fade" data-bs-ride="carousel">
-        <div class="carousel-inner">
-            <div class="carousel-item active" style="background-image: url('/vet_anywhere/assets/images/hero-1.jpg');">
-                <div class="carousel-caption text-start">
-                    <h1 class="display-4 fw-bold animate__animated animate__fadeInDown">Vet Anywhere</h1>
-                    <p class="lead animate__animated animate__fadeInUp animate__delay-1s">Complete pet health management at your fingertips</p>
-                    <?php if (!isLoggedIn()): ?>
-                        <div class="mt-4 animate__animated animate__fadeInUp animate__delay-2s">
-                            <a href="auth/register.php" class="btn btn-primary btn-lg rounded-pill px-4 me-3">
-                                <i class="fas fa-user-plus me-2"></i> Get Started
-                            </a>
-                            <a href="auth/login.php" class="btn btn-outline-light btn-lg rounded-pill px-4">
-                                <i class="fas fa-sign-in-alt me-2"></i> Login
-                            </a>
-                        </div>
-                    <?php else: ?>
-                        <div class="mt-4 animate__animated animate__fadeInUp animate__delay-2s">
-                            <?php if (hasRole('pet_owner')): ?>
-                                <a class="btn btn-primary btn-lg rounded-pill px-4" href="pet_owner/dashboard.php">
-                                    <i class="fas fa-tachometer-alt me-2"></i> Go to Dashboard
-                                </a>
-                            <?php elseif (hasRole('veterinarian')): ?>
-                                <a class="btn btn-primary btn-lg rounded-pill px-4" href="veterinarian/dashboard.php">
-                                    <i class="fas fa-tachometer-alt me-2"></i> Go to Dashboard
-                                </a>
-                            <?php elseif (hasRole('admin')): ?>
-                                <a class="btn btn-primary btn-lg rounded-pill px-4" href="admin/dashboard.php">
-                                    <i class="fas fa-tachometer-alt me-2"></i> Go to Dashboard
-                                </a>
-                            <?php endif; ?>
-                        </div>
-                    <?php endif; ?>
-                </div>
-            </div>
-            <div class="carousel-item" style="background-image: url('/vet_anywhere/assets/images/hero-2.jpg');">
-                <div class="carousel-caption text-start">
-                    <h1 class="display-4 fw-bold">For Pet Owners</h1>
-                    <p class="lead">Keep track of vaccinations, medical history, and appointments</p>
-                </div>
-            </div>
-            <div class="carousel-item" style="background-image: url('/vet_anywhere/assets/images/hero-3.jpg');">
-                <div class="carousel-caption text-start">
-                    <h1 class="display-4 fw-bold">For Veterinarians</h1>
-                    <p class="lead">Streamline patient management and access complete medical records</p>
-                </div>
-            </div>
-        </div>
-        <button class="carousel-control-prev" type="button" data-bs-target="#heroCarousel" data-bs-slide="prev">
-            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-            <span class="visually-hidden">Previous</span>
-        </button>
-        <button class="carousel-control-next" type="button" data-bs-target="#heroCarousel" data-bs-slide="next">
-            <span class="carousel-control-next-icon" aria-hidden="true"></span>
-            <span class="visually-hidden">Next</span>
-        </button>
-    </div>
-</section>
+// Check if user is already logged in
+if (isLoggedIn()) {
+    // Redirect to dashboard based on user type
+    if ($_SESSION['user_type'] === 'pet_owner') {
+        header('Location: dashboard/owner_dashboard.php');
+    } elseif ($_SESSION['user_type'] === 'veterinarian') {
+        header('Location: dashboard/vet_dashboard.php');
+    } elseif ($_SESSION['user_type'] === 'admin') {
+        header('Location: dashboard/admin_dashboard.php');
+    }
+    exit;
+}
 
-<!-- Features Section -->
-<section class="py-5 bg-light">
-    <div class="container">
-        <div class="row justify-content-center mb-5">
-            <div class="col-md-8 text-center">
-                <h2 class="fw-bold mb-3">Why Choose Vet Anywhere?</h2>
-                <p class="lead text-muted">A comprehensive solution for managing your pet's health needs</p>
-            </div>
-        </div>
-        
-        <div class="row g-4">
-            <div class="col-md-4">
-                <div class="card border-0 shadow-sm h-100 feature-card">
-                    <div class="card-body text-center p-4">
-                        <div class="feature-icon bg-primary text-white mb-4">
-                            <i class="fas fa-calendar-check"></i>
-                        </div>
-                        <h4>Easy Scheduling</h4>
-                        <p class="text-muted">Book appointments with your veterinarian at your convenience, anytime and anywhere.</p>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="col-md-4">
-                <div class="card border-0 shadow-sm h-100 feature-card">
-                    <div class="card-body text-center p-4">
-                        <div class="feature-icon bg-primary text-white mb-4">
-                            <i class="fas fa-history"></i>
-                        </div>
-                        <h4>Complete History</h4>
-                        <p class="text-muted">Access your pet's complete medical history including vaccinations, treatments, and medications.</p>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="col-md-4">
-                <div class="card border-0 shadow-sm h-100 feature-card">
-                    <div class="card-body text-center p-4">
-                        <div class="feature-icon bg-primary text-white mb-4">
-                            <i class="fas fa-bell"></i>
-                        </div>
-                        <h4>Timely Reminders</h4>
-                        <p class="text-muted">Never miss important vaccinations or medications with automated reminders.</p>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="col-md-4">
-                <div class="card border-0 shadow-sm h-100 feature-card">
-                    <div class="card-body text-center p-4">
-                        <div class="feature-icon bg-primary text-white mb-4">
-                            <i class="fas fa-comments"></i>
-                        </div>
-                        <h4>Direct Communication</h4>
-                        <p class="text-muted">Chat directly with your veterinarian for quick questions and follow-ups.</p>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="col-md-4">
-                <div class="card border-0 shadow-sm h-100 feature-card">
-                    <div class="card-body text-center p-4">
-                        <div class="feature-icon bg-primary text-white mb-4">
-                            <i class="fas fa-file-medical"></i>
-                        </div>
-                        <h4>Digital Records</h4>
-                        <p class="text-muted">All your pet's information is securely stored and accessible whenever needed.</p>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="col-md-4">
-                <div class="card border-0 shadow-sm h-100 feature-card">
-                    <div class="card-body text-center p-4">
-                        <div class="feature-icon bg-primary text-white mb-4">
-                            <i class="fas fa-mobile-alt"></i>
-                        </div>
-                        <h4>Mobile Friendly</h4>
-                        <p class="text-muted">Access the system from any device, anywhere, at any time.</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
+// Process login form
+$loginError = '';
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login'])) {
+    $username = sanitizeInput($_POST['username']);
+    $password = $_POST['password'];
+    
+    $result = loginUser($username, $password);
+    
+    if ($result['success']) {
+        // Redirect based on user type
+        if ($result['user']['user_type'] === 'pet_owner') {
+            header('Location: dashboard/owner_dashboard.php');
+        } elseif ($result['user']['user_type'] === 'veterinarian') {
+            header('Location: dashboard/vet_dashboard.php');
+        } elseif ($result['user']['user_type'] === 'admin') {
+            header('Location: dashboard/admin_dashboard.php');
+        }
+        exit;
+    } else {
+        $loginError = $result['message'];
+    }
+}
+?>
 
-<!-- How It Works Section -->
-<section class="py-5">
-    <div class="container">
-        <div class="row justify-content-center mb-5">
-            <div class="col-md-8 text-center">
-                <h2 class="fw-bold mb-3">How It Works</h2>
-                <p class="lead text-muted">Simple steps to better pet healthcare management</p>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vet Anywhere - Pet Health Management System</title>
+    <link rel="stylesheet" href="assets/css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <div class="landing-page">
+        <!-- Header -->
+        <header>
+            <div class="logo">
+                <h1>Vet Anywhere</h1>
             </div>
-        </div>
-        
-        <div class="row">
-            <div class="col-md-10 mx-auto">
-                <div class="timeline position-relative">
-                    <!-- Timeline item 1 -->
-                    <div class="timeline-item d-flex">
-                        <div class="timeline-point"></div>
-                        <div class="timeline-content shadow-sm p-4 rounded animate__animated animate__fadeInRight">
-                            <div class="d-flex align-items-center mb-3">
-                                <div class="timeline-icon bg-primary text-white me-3">
-                                    <i class="fas fa-user-plus"></i>
-                                </div>
-                                <h4 class="mb-0">Create an Account</h4>
-                            </div>
-                            <p class="mb-0 text-muted">Register as a pet owner or veterinarian to get started with our platform.</p>
+            <nav>
+                <ul>
+                    <li><a href="#features">Features</a></li>
+                    <li><a href="#how-it-works">How It Works</a></li>
+                    <li><a href="#testimonials">Testimonials</a></li>
+                    <li><a href="register.php" class="btn-secondary">Register</a></li>
+                    <li><a href="#login-modal" class="btn-primary modal-trigger">Login</a></li>
+                </ul>
+            </nav>
+            <div class="mobile-menu">
+                <i class="fas fa-bars"></i>
+            </div>
+        </header>
+
+        <!-- Hero Section -->
+        <section class="hero">
+            <div class="hero-content">
+                <h1>The Complete Pet Health Management System</h1>
+                <p>Keep track of your pet's medical records, vaccinations, and appointments all in one place.</p>
+                <div class="cta-buttons">
+                    <a href="register.php?type=pet_owner" class="btn-primary">I'm a Pet Owner</a>
+                    <a href="register.php?type=veterinarian" class="btn-secondary">I'm a Veterinarian</a>
+                </div>
+            </div>
+            <div class="hero-image">
+            </div>
+        </section>
+
+        <!-- Features Section -->
+        <section id="features" class="features">
+            <h2>Features</h2>
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <i class="fas fa-clipboard-list"></i>
+                    <h3>Medical Records</h3>
+                    <p>Keep all your pet's medical history in one secure location.</p>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-syringe"></i>
+                    <h3>Vaccination Tracking</h3>
+                    <p>Never miss a vaccination with automated reminders.</p>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-calendar-alt"></i>
+                    <h3>Appointment Scheduling</h3>
+                    <p>Schedule and manage vet appointments with ease.</p>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-pills"></i>
+                    <h3>Medication Management</h3>
+                    <p>Track medications, dosages, and refill schedules.</p>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-bell"></i>
+                    <h3>Reminders & Alerts</h3>
+                    <p>Get timely notifications for upcoming pet care needs.</p>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-comments"></i>
+                    <h3>Vet Communication</h3>
+                    <p>Direct messaging with your veterinarian for quick consultations.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- How It Works Section -->
+        <section id="how-it-works" class="how-it-works">
+            <h2>How It Works</h2>
+            <div class="steps">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <h3>Create Your Account</h3>
+                    <p>Register as a pet owner or veterinarian to get started.</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <h3>Add Your Pets</h3>
+                    <p>Create profiles for each of your pets with their details.</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <h3>Connect with Vets</h3>
+                    <p>Find and connect with veterinarians for your pet's care.</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">4</div>
+                    <h3>Manage Health Records</h3>
+                    <p>Keep track of all health-related information in one place.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Testimonials Section -->
+        <section id="testimonials" class="testimonials">
+            <h2>What Our Users Say</h2>
+            <div class="testimonial-slider">
+                <div class="testimonial">
+                    <div class="testimonial-content">
+                        <p>"Vet Anywhere has made managing my pets' health records so much easier. I love getting reminders for vaccinations and appointments!"</p>
+                    </div>
+                    <div class="testimonial-author">
+                        <img src="assets/images/testimonial-1.jpg" alt="Sarah J.">
+                        <div>
+                            <h4>Sarah J.</h4>
+                            <p>Pet Owner</p>
                         </div>
                     </div>
-                    
-                    <!-- Timeline item 2 -->
-                    <div class="timeline-item d-flex">
-                        <div class="timeline-point"></div>
-                        <div class="timeline-content shadow-sm p-4 rounded animate__animated animate__fadeInLeft">
-                            <div class="d-flex align-items-center mb-3">
-                                <div class="timeline-icon bg-primary text-white me-3">
-                                    <i class="fas fa-paw"></i>
-                                </div>
-                                <h4 class="mb-0">Add Your Pets</h4>
-                            </div>
-                            <p class="mb-0 text-muted">Enter your pets' details, upload photos, and start building their digital medical records.</p>
+                </div>
+                <div class="testimonial">
+                    <div class="testimonial-content">
+                        <p>"As a veterinarian, this system has streamlined my practice and improved communication with pet owners. The complete medical history at my fingertips is invaluable."</p>
+                    </div>
+                    <div class="testimonial-author">
+                        <img src="assets/images/testimonial-2.jpg" alt="Dr. Michael T.">
+                        <div>
+                            <h4>Dr. Michael T.</h4>
+                            <p>Veterinarian</p>
                         </div>
                     </div>
-                    
-                    <!-- Timeline item 3 -->
-                    <div class="timeline-item d-flex">
-                        <div class="timeline-point"></div>
-                        <div class="timeline-content shadow-sm p-4 rounded animate__animated animate__fadeInRight">
-                            <div class="d-flex align-items-center mb-3">
-                                <div class="timeline-icon bg-primary text-white me-3">
-                                    <i class="fas fa-calendar-alt"></i>
-                                </div>
-                                <h4 class="mb-0">Schedule Appointments</h4>
-                            </div>
-                            <p class="mb-0 text-muted">Book appointments with veterinarians based on availability and your schedule.</p>
-                        </div>
+                </div>
+                <div class="testimonial">
+                    <div class="testimonial-content">
+                        <p>"I have three pets with different medical needs. Vet Anywhere helps me keep everything organized and ensures they all get the care they need on time."</p>
                     </div>
-                    
-                    <!-- Timeline item 4 -->
-                    <div class="timeline-item d-flex">
-                        <div class="timeline-point"></div>
-                        <div class="timeline-content shadow-sm p-4 rounded animate__animated animate__fadeInLeft">
-                            <div class="d-flex align-items-center mb-3">
-                                <div class="timeline-icon bg-primary text-white me-3">
-                                    <i class="fas fa-stethoscope"></i>
-                                </div>
-                                <h4 class="mb-0">Receive Care</h4>
-                            </div>
-                            <p class="mb-0 text-muted">Visit your vet for the appointment, and they'll update your pet's medical records directly in the system.</p>
-                        </div>
-                    </div>
-                    
-                    <!-- Timeline item 5 -->
-                    <div class="timeline-item d-flex">
-                        <div class="timeline-point"></div>
-                        <div class="timeline-content shadow-sm p-4 rounded animate__animated animate__fadeInRight">
-                            <div class="d-flex align-items-center mb-3">
-                                <div class="timeline-icon bg-primary text-white me-3">
-                                    <i class="fas fa-chart-line"></i>
-                                </div>
-                                <h4 class="mb-0">Track Health Progress</h4>
-                            </div>
-                            <p class="mb-0 text-muted">Monitor your pet's health over time with comprehensive records and analytics.</p>
+                    <div class="testimonial-author">
+                        <img src="assets/images/testimonial-3.jpg" alt="Robert L.">
+                        <div>
+                            <h4>Robert L.</h4>
+                            <p>Pet Owner</p>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
-    </div>
-</section>
-
-<!-- Testimonials Section -->
-<section class="py-5 bg-light">
-    <div class="container">
-        <div class="row justify-content-center mb-5">
-            <div class="col-md-8 text-center">
-                <h2 class="fw-bold mb-3">What Our Users Say</h2>
-                <p class="lead text-muted">Trusted by pet owners and veterinarians alike</p>
+            <div class="slider-controls">
+                <button class="prev-btn"><i class="fas fa-chevron-left"></i></button>
+                <div class="slider-dots">
+                    <span class="dot active"></span>
+                    <span class="dot"></span>
+                    <span class="dot"></span>
+                </div>
+                <button class="next-btn"><i class="fas fa-chevron-right"></i></button>
             </div>
-        </div>
-        
-        <div class="row">
-            <div class="col-12">
-                <div id="testimonialCarousel" class="carousel slide" data-bs-ride="carousel">
-                    <div class="carousel-inner">
-                        <div class="carousel-item active">
-                            <div class="row g-4">
-                                <div class="col-md-6">
-                                    <div class="card border-0 shadow-sm testimonial-card h-100">
-                                        <div class="card-body p-4">
-                                            <div class="d-flex align-items-center mb-3">
-                                                <img src="/vet_anywhere/assets/images/testimonial-1.jpg" alt="User" class="rounded-circle me-3" width="60">
-                                                <div>
-                                                    <h5 class="mb-0">Sarah Johnson</h5>
-                                                    <p class="text-muted mb-0 small">Pet Owner</p>
-                                                </div>
-                                            </div>
-                                            <div class="testimonial-rating text-warning mb-3">
-                                                <i class="fas fa-star"></i>
-                                                <i class="fas fa-star"></i>
-                                                <i class="fas fa-star"></i>
-                                                <i class="fas fa-star"></i>
-                                                <i class="fas fa-star"></i>
-                                            </div>
-                                            <p class="testimonial-text">"As a busy pet parent to three dogs, keeping track of vaccinations and vet visits was always a challenge. Vet Anywhere has simplified everything! I love getting reminders before appointments and having all records in one place."</p>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="card border-0 shadow-sm testimonial-card h-100">
-                                        <div class="card-body p-4">
-                                            <div class="d-flex align-items-center mb-3">
-                                                <img src="/vet_anywhere/assets/images/testimonial-2.jpg" alt="User" class="rounded-circle me-3" width="60">
-                                                <div>
-                                                    <h5 class="mb-0">Dr. Michael Rivera</h5>
-                                                    <p class="text-muted mb-0 small">Veterinarian</p>
-                                                </div>
-                                            </div>
-                                            <div class="testimonial-rating text-warning mb-3">
-                                                <i class="fas fa-star"></i>
-                                                <i class="fas fa-star"></i>
-                                                <i class="fas fa-star"></i>
-                                                <i class="fas fa-star"></i>
-                                                <i class="fas fa-star"></i>
-                                            </div>
-                                            <p class="testimonial-text">"This system has transformed my veterinary practice. Patient history is readily accessible, and the appointment system has reduced no-shows by 40%. My staff loves how user-friendly it is!"</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="carousel-item">
-                            <div class="row g-4">
-                                <div class="col-md-6">
-                                    <div class="card border-0 shadow-sm testimonial-card h-100">
-                                        <div class="card-body p-4">
-                                            <div class="d-flex align-items-center mb-3">
-                                                <img src="/vet_anywhere/assets/images/testimonial-3.jpg" alt="User" class="rounded-circle me-3" width="60">
-                                                <div>
-                                                    <h5 class="mb-0">James Wilson</h5>
-                                                    <p class="text-muted mb-0 small">Pet Owner</p>
-                                                </div>
-                                            </div>
-                                            <div class="testimonial-rating text-warning mb-3">
-                                                <i class="fas fa-star"></i>
-                                                <i class="fas fa-star"></i>
-                                                <i class="fas fa-star"></i>
-                                                <i class="fas fa-star"></i>
-                                                <i class="fas fa-star"></i>
-                                            </div>
-                                            <p class="testimonial-text">"My cat has a chronic condition that requires regular monitoring. Vet Anywhere helps me track her symptoms, medication schedule, and treatment progress. It's been a game-changer for managing her health."</p>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="card border-0 shadow-sm testimonial-card h-100">
-                                        <div class="card-body p-4">
-                                            <div class="d-flex align-items-center mb-3">
-                                                <img src="/vet_anywhere/assets/images/testimonial-4.jpg" alt="User" class="rounded-circle me-3" width="60">
-                                                <div>
-                                                    <h5 class="mb-0">Dr. Emily Chen</h5>
-                                                    <p class="text-muted mb-0 small">Veterinary Clinic Owner</p>
-                                                </div>
-                                            </div>
-                                            <div class="testimonial-rating text-warning mb-3">
-                                                <i class="fas fa-star"></i>
-                                                <i class="fas fa-star"></i>
-                                                <i class="fas fa-star"></i>
-                                                <i class="fas fa-star"></i>
-                                                <i class="fas fa-star-half-alt"></i>
-                                            </div>
-                                            <p class="testimonial-text">"We implemented Vet Anywhere across our three clinic locations, and it has streamlined our operations significantly. The digital records are accessible from any location, which helps when patients visit different branches."</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+        </section>
+
+        <!-- Footer -->
+        <footer>
+            <div class="footer-content">
+                <div class="footer-logo">
+                    <img src="assets/images/logo.png" alt="Vet Anywhere Logo">
+                    <h3>Vet Anywhere</h3>
+                </div>
+                <div class="footer-links">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="#features">Features</a></li>
+                        <li><a href="#how-it-works">How It Works</a></li>
+                        <li><a href="#testimonials">Testimonials</a></li>
+                        <li><a href="register.php">Register</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>Resources</h4>
+                    <ul>
+                        <li><a href="#">Help Center</a></li>
+                        <li><a href="#">Privacy Policy</a></li>
+                        <li><a href="#">Terms of Service</a></li>
+                        <li><a href="#">Contact Us</a></li>
+                    </ul>
+                </div>
+                <div class="footer-newsletter">
+                    <h4>Stay Updated</h4>
+                    <p>Subscribe to our newsletter for tips on pet health care.</p>
+                    <form>
+                        <input type="email" placeholder="Enter your email">
+                        <button type="submit" class="btn-primary">Subscribe</button>
+                    </form>
+                    <div class="social-icons">
+                        <a href="#"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-youtube"></i></a>
                     </div>
-                    <button class="carousel-control-prev" type="button" data-bs-target="#testimonialCarousel" data-bs-slide="prev">
-                        <span class="carousel-control-prev-icon bg-primary rounded-circle" aria-hidden="true"></span>
-                        <span class="visually-hidden">Previous</span>
-                    </button>
-                    <button class="carousel-control-next" type="button" data-bs-target="#testimonialCarousel" data-bs-slide="next">
-                        <span class="carousel-control-next-icon bg-primary rounded-circle" aria-hidden="true"></span>
-                        <span class="visually-hidden">Next</span>
-                    </button>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; <?php echo date('Y'); ?> Vet Anywhere. All rights reserved.</p>
+            </div>
+        </footer>
+
+        <!-- Login Modal -->
+        <div id="login-modal" class="modal">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <h2>Login to Vet Anywhere</h2>
+                <?php if ($loginError): ?>
+                    <div class="error-message"><?php echo $loginError; ?></div>
+                <?php endif; ?>
+                <form method="post" action="">
+                    <div class="form-group">
+                        <label for="username">Username or Email</label>
+                        <input type="text" id="username" name="username" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <input type="password" id="password" name="password" required>
+                    </div>
+                    <div class="form-group remember">
+                        <input type="checkbox" id="remember" name="remember">
+                        <label for="remember">Remember me</label>
+                    </div>
+                    <button type="submit" name="login" class="btn-primary btn-full">Login</button>
+                </form>
+                <div class="modal-footer">
+                    <p>Don't have an account? <a href="register.php">Register</a></p>
+                    <p><a href="forgot-password.php">Forgot Password?</a></p>
                 </div>
             </div>
         </div>
     </div>
-</section>
 
-<!-- CTA Section -->
-<section class="py-5 bg-primary text-white text-center">
-    <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-md-8">
-                <h2 class="fw-bold mb-4">Ready to Transform Your Pet's Healthcare?</h2>
-                <p class="lead mb-4">Join thousands of pet owners and veterinarians already using Vet Anywhere</p>
-                <a href="auth/register.php" class="btn btn-light btn-lg rounded-pill px-5">
-                    <i class="fas fa-paw me-2"></i> Get Started for Free
-                </a>
-            </div>
-        </div>
-    </div>
-</section>
-
-<?php include 'includes/footer.php'; ?>
+    <script src="assets/js/main.js"></script>
+</body>
+</html>
